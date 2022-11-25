@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -32,12 +32,21 @@ async function run() {
             console.log("Category", result)
             res.send(result)
         });
+        
+        app.get('/phone/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id)};
+            const result = await usedPhoneCollection.findOne(query);
+            console.log(result);
+            res.send(result);
+        })
 
         app.post('/users', async(req, res) => {
             const user = req.body;
             const result = await userCollection.insertOne(user);
             res.send(result)
         });
+
     }
 
     finally{
