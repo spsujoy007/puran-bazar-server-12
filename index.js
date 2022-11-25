@@ -17,6 +17,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try{
         const usedPhoneCollection = client.db('puranbazar').collection('phonesCollection');
+        const userCollection = client.db('puranbazar').collection('users');
 
         app.get('/usedphones', async(req, res) => {
             const query = {};
@@ -27,12 +28,16 @@ async function run() {
         app.get('/usedphones/:category', async(req,res)=>{
             const category = req.params.category;
             const query = {category: (category)};
-            const result = await usedPhoneCollection.findOne(query)
+            const result = await usedPhoneCollection.find(query).toArray();
             console.log("Category", result)
             res.send(result)
         });
 
-
+        app.post('/users', async(req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user);
+            res.send(result)
+        });
     }
 
     finally{
