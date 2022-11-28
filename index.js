@@ -11,13 +11,22 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.6ke0m0t.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
     try{
         const usedPhoneCollection = client.db('puranbazar').collection('phonesCollection');
         const userCollection = client.db('puranbazar').collection('users');
+        const ordersCollection = client.db('puranbazar').collection('orders');
+
+
+        //add new product in usedProductCollection
+        app.post('/usedphones', async(req, res) => {
+            const product = req.body;
+            const result = await usedPhoneCollection.insertOne(product);
+            console.log(result)
+            res.send(result)
+        })
 
         app.get('/usedphones', async(req, res) => {
             const query = {};
@@ -25,25 +34,66 @@ async function run() {
             res.send(result)
         });
 
+        //get products by the seller
+        app.get('/myproducts', async(req, res) => {
+            const email = req.query.email;
+            const query = {useremail: email};
+            const result = await usedPhoneCollection.find(query).toArray();
+            res.send(result)
+            console.log(result)
+        })
+
+        //add booking modal data in mongodb
+        app.post('/orders', async(req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.send(result)
+        });
+
+        app.get('/orders', async(req,res) => {
+            const useremail = req.query.email;
+            console.log(useremail)
+            const query = {email: (useremail)};
+            const result = await ordersCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        //deleting order with handler
+        app.delete('/orders', async(req, res) => {
+            const id = req.query.id;
+            const query = {_id: ObjectId(id)};
+            const result = await ordersCollection.deleteOne(query);
+            console.log(result);
+        })
+
+        //clicking or find by category
         app.get('/usedphones/:category', async(req,res)=>{
             const category = req.params.category;
             const query = {category: (category)};
             const result = await usedPhoneCollection.find(query).toArray();
-            console.log("Category", result)
             res.send(result)
         });
         
+
+        //single phone with unic id
         app.get('/phone/:id', async(req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id)};
             const result = await usedPhoneCollection.findOne(query);
-            console.log(result);
             res.send(result);
         })
 
+
+        //collection for know the role of user
         app.post('/users', async(req, res) => {
             const user = req.body;
             const result = await userCollection.insertOne(user);
+            res.send(result)
+        });
+
+        app.get('/users', async(req, res)=> {
+            const query = {};
+            const result = await userCollection.find(query).toArray();
             res.send(result)
         });
 
@@ -57,9 +107,9 @@ run().catch(err => console.error(err))
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Puran Bazar web server')
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Puran bazar web server on port ${port}`)
 })
