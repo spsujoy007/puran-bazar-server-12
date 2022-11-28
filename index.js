@@ -40,6 +40,14 @@ async function run() {
             const query = {useremail: email};
             const result = await usedPhoneCollection.find(query).toArray();
             res.send(result)
+        })
+
+        //Seller can delete an product with deleting
+        app.delete('/myproducts', async(req, res) => {
+            const id = req.query.id;
+            const query = {_id: ObjectId(id)};
+            const result = await usedPhoneCollection.deleteOne(query);
+            res.send(result);
             console.log(result)
         })
 
