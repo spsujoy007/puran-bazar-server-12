@@ -34,6 +34,28 @@ async function run() {
             res.send(result)
         });
 
+        //for report to admin
+        app.put('/usedphones', async(req, res) => {
+            const id = req.query.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+            $set: {
+              report: true
+            }
+          }
+          const result = await usedPhoneCollection.updateOne(filter, updatedDoc, options)
+          res.send(result)
+        });
+
+        //get the reported items
+        app.get('/reporteditems', async(req, res) => {
+            const report = req.query.report;
+            const query = {report: (report)};
+            const result = await usedPhoneCollection.find(query).toArray();
+            res.send(result)
+        })
+
         //get products by the seller
         app.get('/myproducts', async(req, res) => {
             const email = req.query.email;
@@ -48,7 +70,6 @@ async function run() {
             const query = {_id: ObjectId(id)};
             const result = await usedPhoneCollection.deleteOne(query);
             res.send(result);
-            console.log(result)
         })
 
         //add booking modal data in mongodb
@@ -60,7 +81,6 @@ async function run() {
 
         app.get('/orders', async(req,res) => {
             const useremail = req.query.email;
-            console.log(useremail)
             const query = {email: (useremail)};
             const result = await ordersCollection.find(query).toArray();
             res.send(result);
@@ -71,7 +91,7 @@ async function run() {
             const id = req.query.id;
             const query = {_id: ObjectId(id)};
             const result = await ordersCollection.deleteOne(query);
-            console.log(result);
+            res.send(result)
         })
 
         //clicking or find by category
