@@ -34,6 +34,8 @@ async function run() {
             res.send(result)
         });
 
+        
+
         //for report to admin
         app.put('/usedphones', async(req, res) => {
             const id = req.query.id;
@@ -64,7 +66,7 @@ async function run() {
             res.send(result)
         })
 
-        //Seller can delete an product with deleting
+        //Seller can delete an product with deleting // and delete item for reported items 
         app.delete('/myproducts', async(req, res) => {
             const id = req.query.id;
             const query = {_id: ObjectId(id)};
@@ -124,6 +126,29 @@ async function run() {
             const result = await userCollection.find(query).toArray();
             res.send(result)
         });
+
+        //get user by the useremail for verifing        
+        app.get('/users/:email', async(req, res)=> {
+            const email = req.params.email;
+            const query = {email: email};
+            const result = await userCollection.findOne(query);
+            res.send(result);
+            console.log(result);
+        });
+
+        //verify user by put method
+        app.put('/users', async(req, res)=> {
+            const id = req.query.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+            $set: {
+              verified: true
+            }
+          }
+          const result = await userCollection.updateOne(filter, updatedDoc, options)
+          res.send(result)
+        })
 
     }
 
