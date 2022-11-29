@@ -113,7 +113,6 @@ async function run() {
             res.send(result);
         })
 
-
         //collection for know the role of user
         app.post('/users', async(req, res) => {
             const user = req.body;
@@ -131,8 +130,8 @@ async function run() {
         app.get('/users/:email', async(req, res)=> {
             const email = req.params.email;
             const query = {email: email};
-            const result = await userCollection.findOne(query);
-            res.send(result);
+            const result = await userCollection.find(query).toArray();
+            res.send(email);
             console.log(result);
         });
 
@@ -148,7 +147,30 @@ async function run() {
           }
           const result = await userCollection.updateOne(filter, updatedDoc, options)
           res.send(result)
-        })
+        });
+
+        //for admin route
+        app.get('/users/admin/:email', async(req, res) => {
+            const email = req.params.email;
+            const query =  { email };
+            const user = await userCollection.findOne(query);
+            res.send({isAdmin: user?.role === 'Admin'})
+         });
+
+         //for all seller route
+        app.get('/users/seller/:email', async(req, res) => {
+            const email = req.params.email;
+            const query =  { email };
+            const user = await userCollection.findOne(query);
+            res.send({isSeller: user?.role === 'Seller'})
+         });
+
+         app.delete('/users', async(req, res) => {
+            const id = req.query.id;
+            const query = {_id: ObjectId(id)};
+            const result = await userCollection.deleteOne(query);
+            res.send(result)
+         });
 
     }
 
