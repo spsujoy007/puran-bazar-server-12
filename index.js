@@ -72,7 +72,29 @@ async function run() {
             const query = {_id: ObjectId(id)};
             const result = await usedPhoneCollection.deleteOne(query);
             res.send(result);
+        });
+
+        //Advertise product by clicking
+        app.put('/myproducts', async(req, res) => {
+            const id = req.query.id;
+            const filter = {_id: ObjectId(id)};
+            const options = {upsert: true};
+            const updatedDoc = {
+            $set: {
+              advertising: true
+            }
+          }
+          const result = await usedPhoneCollection.updateOne(filter, updatedDoc, options)
+          res.send(result)
         })
+
+        //filter by advertising items
+        app.get('/advertiseditems', async(req, res) => {
+            const query = {};
+            const phones = await usedPhoneCollection.find(query).toArray();
+            const advertiseditem = phones.filter(adPhone => adPhone.advertising === true) 
+            res.send(advertiseditem)
+        });
 
         //add booking modal data in mongodb
         app.post('/orders', async(req, res) => {
